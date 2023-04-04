@@ -47,7 +47,7 @@ def infer(str_epoch):
 
     # Configure data loader
     cfg = {
-        "meta_file": "../data/test.txt",
+        "meta_file": "./data/test.txt",
         "batch_size": opt.batch_size,
         "workers": 1,
     }
