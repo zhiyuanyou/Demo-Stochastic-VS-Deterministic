@@ -16,7 +16,7 @@
 
 - ***Training***: `python train_gan.py --stochastic --robust`
 - ***Inference***: `python infer_gan.py --stochastic --robust`
-- ***Visualization***: `python vis_pred.py --stochastic --robust`
+- ***Visualization***: `python vis_pred.py --stochastic --robust -n #NUM_POINTS`
 
 **Note**: _--stochastic --robust_ are optional. _--stochastic_ means using _stochastic_ algorithm, and _--robust_ means using *robust loss*. 
 
