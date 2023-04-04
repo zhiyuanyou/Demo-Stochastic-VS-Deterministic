@@ -11,26 +11,33 @@ from torch.autograd import Variable
 from utils import set_random_seed
 
 parser = argparse.ArgumentParser()
+# main configs
 parser.add_argument("-s", "--stochastic", action="store_true", help="stochastic or not")
-parser.add_argument("--epochs", type=int, default=100, help="number epochs")
-parser.add_argument("--batch_size", type=int, default=64, help="batch size")
-parser.add_argument("--lr", type=float, default=0.0001, help="adam: learning rate")
+# robust configs
+parser.add_argument("-r", "--robust", action="store_true", help="robust or not")
 parser.add_argument(
     "--weight_robust", type=float, default=0.1, help="weight of robust loss"
 )
+# training configs
+parser.add_argument("--epochs", type=int, default=100, help="number epochs")
+parser.add_argument("--batch_size", type=int, default=64, help="batch size")
+parser.add_argument("--lr", type=float, default=0.0001, help="adam: learning rate")
 parser.add_argument(
     "--b1", type=float, default=0, help="adam: decay of 1st order momentum"
 )
 parser.add_argument(
     "--b2", type=float, default=0.9, help="adam: decay of 2rd order momentum"
 )
-parser.add_argument("--exp_dir", type=str, default="exp_robust", help="exp dir")
+# other configs
+parser.add_argument("--exp_dir", type=str, default="exp", help="exp dir")
 parser.add_argument("--ckpt_dir", type=str, default="ckpt", help="ckpt dir")
 parser.add_argument(
     "--save_interval", type=int, default=5, help="epoch interval to save"
 )
 parser.add_argument("--seed", type=int, default=131, help="random seed")
 opt = parser.parse_args()
+if opt.robust:
+    opt.exp_dir = opt.exp_dir + "_robust"
 print(opt)
 
 set_random_seed(opt.seed)
@@ -40,9 +47,10 @@ os.makedirs(os.path.join(opt.exp_dir, opt.ckpt_dir), exist_ok=True)
 
 # Loss function
 adversarial_loss = nn.BCELoss()
-robust_lost = RobustLoss(
-    opt.stochastic, num_max_sample=10, num_z_sample=50, epsilon=0.001
-)
+if opt.robust:
+    robust_lost = RobustLoss(
+        opt.stochastic, num_max_sample=10, num_z_sample=50, epsilon=0.001
+    )
 
 # Initialize generator and discriminator
 generator = Generator()
@@ -106,9 +114,12 @@ for epoch in range(opt.epochs):
         gen_x2 = generator(real_x1, z)
 
         # Loss measures generator's ability to fool the discriminator
-        g_loss = adversarial_loss(
-            discriminator(real_x1, gen_x2), valid
-        ) + opt.weight_robust * robust_lost(generator, real_x1)
+        if opt.robust:
+            g_loss = adversarial_loss(
+                discriminator(real_x1, gen_x2), valid
+            ) + opt.weight_robust * robust_lost(generator, real_x1)
+        else:
+            g_loss = adversarial_loss(discriminator(real_x1, gen_x2), valid)
 
         g_loss.backward()
         optimizer_G.step()

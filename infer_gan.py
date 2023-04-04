@@ -11,12 +11,15 @@ from utils import set_random_seed
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--stochastic", action="store_true", help="stochastic or not")
+parser.add_argument("-r", "--robust", action="store_true", help="robust or not")
 parser.add_argument("--batch_size", type=int, default=64, help="batch size")
-parser.add_argument("--exp_dir", type=str, default="exp_robust", help="exp dir")
+parser.add_argument("--exp_dir", type=str, default="exp", help="exp dir")
 parser.add_argument("--ckpt_dir", type=str, default="ckpt", help="ckpt dir")
 parser.add_argument("--pred_dir", type=str, default="preds", help="pred dir")
 parser.add_argument("--seed", type=int, default=131, help="random seed")
 opt = parser.parse_args()
+if opt.robust:
+    opt.exp_dir = opt.exp_dir + "_robust"
 print(opt)
 
 set_random_seed(opt.seed)
